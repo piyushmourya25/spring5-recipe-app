@@ -9,7 +9,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.ui.Model;
 import piyush.springframework.domain.Recipe;
-import piyush.springframework.service.RecipeService;
+import piyush.springframework.services.RecipeService;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -24,6 +24,7 @@ public class IndexControllerTest {
 
     @Mock
     RecipeService recipeService;
+
     @Mock
     Model model;
 
@@ -32,20 +33,21 @@ public class IndexControllerTest {
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
-        controller = new IndexController(recipeService);
 
+        controller = new IndexController(recipeService);
     }
 
     @Test
     public void testMockMVC() throws Exception {
         MockMvc mockMvc = MockMvcBuilders.standaloneSetup(controller).build();
+
         mockMvc.perform(get("/"))
                 .andExpect(status().isOk())
                 .andExpect(view().name("index"));
     }
 
     @Test
-    public void getIndexPage() {
+    public void getIndexPage() throws Exception {
 
         //given
         Set<Recipe> recipes = new HashSet<>();
@@ -53,6 +55,7 @@ public class IndexControllerTest {
 
         Recipe recipe = new Recipe();
         recipe.setId(1L);
+
         recipes.add(recipe);
 
         when(recipeService.getRecipes()).thenReturn(recipes);
@@ -62,11 +65,13 @@ public class IndexControllerTest {
         //when
         String viewName = controller.getIndexPage(model);
 
+
         //then
         assertEquals("index", viewName);
         verify(recipeService, times(1)).getRecipes();
-        verify(model, times(1)).addAttribute(eq("recipes"),argumentCaptor.capture());
+        verify(model, times(1)).addAttribute(eq("recipes"), argumentCaptor.capture());
         Set<Recipe> setInController = argumentCaptor.getValue();
         assertEquals(2, setInController.size());
     }
+
 }
